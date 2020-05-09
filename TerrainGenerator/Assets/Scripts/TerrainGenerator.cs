@@ -48,15 +48,6 @@ public class TerrainGenerator : MonoBehaviour
 
     #endregion
 
-    #region VIGNETTE
-
-    [Header("Vignette")] 
-    public float vignetteOffset;
-
-    public float vignetteTime;
-    
-    #endregion
-    
     #region LAYERING
     [Header("Noise")]
     
@@ -132,13 +123,17 @@ public class TerrainGenerator : MonoBehaviour
         minNoiseHeight = float.PositiveInfinity;
         maxNoiseHeight = float.NegativeInfinity;
         
+        float amplitude = 1;
+        float frequency = 1;
+        
         _heights = new List<float>();
 
         for (int i = 0; i < _mesh.vertices.Count; i++)
         {
-            float multiplier = 1f;
-            float f = frequency;
+            amplitude = 1;
+            frequency = 1;
             float height = 0f;
+            
             Vector2 pos = new Vector2((float)_mesh.vertices[i].x, (float)_mesh.vertices[i].y);
 
             for (int j = 1; j <= octaves; j++)
@@ -146,12 +141,9 @@ public class TerrainGenerator : MonoBehaviour
                 float nx = pos.x / size.x;
                 float ny = pos.y / size.y;
           
-                float noise = multiplier * Mathf.PerlinNoise(f * nx + seed, f * ny + seed);
+                float noise =  Mathf.PerlinNoise( nx + seed, ny + seed);
                 
                 height += noise;
-                
-                multiplier /= j;
-                f *= 2;
             }
             
             if (height > maxNoiseHeight)
@@ -162,13 +154,8 @@ public class TerrainGenerator : MonoBehaviour
             {
                 minNoiseHeight = height;
             }
-
-            /*
-            float d = Vector3.Distance(_centre, new Vector3(pos.x, _centre.y, pos.y));
-            float v = Mathf.Clamp(Mathf.Log(d * vignetteOffset, vignetteTime), 0, height);
             
-            h += v;*/
-            height = (height < 0f) ? height * scale / 10f : height* scale;
+            height = (height < 0f) ? height : height* scale;
             
             _heights.Add(height);
         }
@@ -229,8 +216,25 @@ public class TerrainGenerator : MonoBehaviour
     }
 }
 
-public enum Distribution
+
+
+
+[Serializable]
+public class BiomeSetting 
 {
-    RANDOM,
-    POISSON
+    public float scale = 50;
+    public int octaves = 6;
+    [Range(0,1)]
+    public float persistance =.6f;
+    public float lacunarity = 2;
+
+    public int seed;
+    public Vector2 offset;
+
+    public void ValidateValues() {
+        scale = Mathf.Max (scale, 0.01f);
+        octaves = Mathf.Max (octaves, 1);
+        lacunarity = Mathf.Max (lacunarity, 1);
+        persistance = Mathf.Clamp01 (persistance);
+    }
 }
