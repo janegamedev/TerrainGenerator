@@ -7,6 +7,8 @@ using Mesh = TriangleNet.Mesh;
 public class MapDisplay : MonoBehaviour
 {
     public Material material;
+    /*public Biome[] biomes;*/
+    public Gradient gradient;
     
     private MeshFilter _meshFilter;
     private MeshRenderer _meshRenderer;
@@ -23,8 +25,6 @@ public class MapDisplay : MonoBehaviour
             _meshRenderer = GetComponent<MeshRenderer>();
         }
         
-        Vector2 map = new Vector2(noiseMap.GetLength(0), noiseMap.GetLength(1));
-
         List<Color> colorMap = new List<Color>();
        
         IEnumerator<Triangle> trisEnum = mesh.Triangles.GetEnumerator();
@@ -49,7 +49,7 @@ public class MapDisplay : MonoBehaviour
 
             for (int k = 0; k < 3; k++)
             {
-                colorMap.Add(Color.Lerp(Color.black, Color.white, noiseMap[(int)pos.x, (int)pos.y]));
+                colorMap.Add(gradient.Evaluate(noiseMap[(int)pos.x, (int) pos.y]));
             }
         }
 
