@@ -8,6 +8,7 @@ public class MapGenerator : MonoBehaviour
     public float noiseScale;
     public bool autoUpdate;
 
+    public float meshHeight;
     [Range(0,10)]
     public int octaves;
     [Range(0,1)]
@@ -17,18 +18,19 @@ public class MapGenerator : MonoBehaviour
     public int seed;
     public Vector2 offset;
     
-    private MeshGenerator _meshGenerator;
+    #region SAMPLING
+
+    [Header("Point sampling")] 
+    public DistributionData distributionData;
+
+    #endregion
+    
     private MapDisplay _mapDisplay;
 
-    private Mesh _mesh;
+    private MeshData _meshData;
 
     public void GenerateMap() 
     {
-        if (_meshGenerator == null)
-        {
-            _meshGenerator = GetComponent<MeshGenerator>();
-        }
-
         if (_mapDisplay == null)
         {
             _mapDisplay = GetComponent<MapDisplay>();
@@ -36,11 +38,12 @@ public class MapGenerator : MonoBehaviour
         
         float[,] noiseMap = Noise.GenerateNoiseMap(mapSize, noiseScale, seed, octaves, persistance, lacunarity, offset);
         
-        TriangleNet.Mesh mesh = _meshGenerator.GenerateTris(mapSize);
+        TriangleNet.Mesh mesh = MeshGenerator.GenerateTris(mapSize, distributionData);
         Color[] colors = _mapDisplay.GenerateNoiseColors(mesh, noiseMap);
-        _mesh = _meshGenerator.GenerateMesh(mesh);
-        _mesh.colors = colors;
-        _mapDisplay.DisplayMesh(_mesh);
+        _meshData = MeshGenerator.GenerateTerrainMesh(mesh, noiseMap, meshHeight);
+        _meshData.AddColors(colors);
+        UnityEngine.Mesh m = _meshData.CreateMesh();
+        _mapDisplay.DisplayMesh(m);
     }
     
     void OnValidate() 
@@ -57,3 +60,20 @@ public class MapGenerator : MonoBehaviour
     }
 }
 
+[System.Serializable]
+public struct DistributionData
+{
+    public Distribution distribution;
+    [Range(4, 6000)]
+    public int pointDensity;
+    [Range(10,150)]
+    public float radius;
+    [Range(5,50)] 
+    public int rejectionSamples;
+}
+
+public enum Distribution
+{
+    RANDOM,
+    POISSON
+}
