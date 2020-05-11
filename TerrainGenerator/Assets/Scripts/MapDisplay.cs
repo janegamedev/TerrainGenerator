@@ -7,7 +7,6 @@ using Mesh = TriangleNet.Mesh;
 public class MapDisplay : MonoBehaviour
 {
     public Material material;
-    /*public Biome[] biomes;*/
     public Gradient gradient;
     
     private MeshFilter _meshFilter;

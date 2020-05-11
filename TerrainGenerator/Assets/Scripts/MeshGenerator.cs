@@ -15,15 +15,17 @@ public static class MeshGenerator
     public static Mesh GenerateTris(int size, DistributionData data, int levelOfDetail)
     {
         Polygon polygon = new Polygon();
-        int meshSimplificationIncrement = (levelOfDetail == 0)?1:levelOfDetail * 4;
+        int percentage =  Mathf.Clamp(levelOfDetail, 1, 0);
         
         switch (data.distribution)
         {
             case Distribution.RANDOM:
-                polygon = PointSampling.GenerateRandomDistribution(size, data.pointDensity/meshSimplificationIncrement);
+                int pointDensity = (data.maxPointDensity - data.minPointDensity) * percentage + data.minPointDensity;
+                polygon = PointSampling.GenerateRandomDistribution(size, pointDensity);
                 break;
             case Distribution.POISSON:
-                polygon = PointSampling.GeneratePoissonDistribution(data.radius, size, data.rejectionSamples);
+                float radius = (data.maxRadius - data.minRadius) * (1-percentage) + data.minRadius;
+                polygon = PointSampling.GeneratePoissonDistribution(radius, size, data.rejectionSamples);
                 break;
             default:
                 throw new ArgumentOutOfRangeException();

@@ -5,66 +5,70 @@ using UnityEngine;
 
 public static class PointSampling
 {
-    public static Polygon GeneratePoissonDistribution(float radius, int size, int n = 30)
+    public static Polygon GeneratePoissonDistribution(float radius, int size, int numSamplesBeforeRejection = 30)
     {
-        Vector2 mapSize = new Vector2(size,size);
-        float cellSize = radius / Mathf.Sqrt(2);
+        float cellSize = radius/Mathf.Sqrt(2);
+        
         int[,] grid = new int[Mathf.CeilToInt(size/cellSize),Mathf.CeilToInt(size/cellSize)];
         List<Vector2> points = new List<Vector2>();
-        List<Vector2> spawnPoints = new List<Vector2>();
-        spawnPoints.Add(mapSize/2);
-        Polygon polygon = new Polygon();
+        List<Vector2> spawnPoints = new List<Vector2> {Vector2.one * size / 2};
+
         
         while (spawnPoints.Count > 0)
         {
-            int index = Random.Range(0, spawnPoints.Count - 1);
-            Vector2 spawnCenter = spawnPoints[index];
-            bool pointAccepted = false; 
-            for (int i = 0; i < n; i++)
+            int spawnIndex = Random.Range(0, spawnPoints.Count);
+            Vector2 spawnCenter = spawnPoints[spawnIndex];
+            bool candidateAccepted = false; 
+            
+            
+            for (int i = 0; i < numSamplesBeforeRejection; i++)
             {
                 float angle = Random.value * Mathf.PI * 2;
                 Vector2 dir = new Vector2(Mathf.Sin(angle),Mathf.Cos(angle));
-                Vector2 point = spawnCenter + dir * Random.Range(radius, 2 * radius);
+                Vector2 candidate = spawnCenter + dir * Random.Range(radius, 2 * radius);
 
-                if (IsValid(point, mapSize, cellSize, radius, points, grid))
+                if (IsValid(candidate, size, cellSize, radius, points, grid))
                 {
-                    polygon.Add(new Vertex(point.x,point.y));
-                    
-                    points.Add(point);
-                    spawnPoints.Add(point);
-                    grid[(int)(point.x/cellSize),(int)(point.y/cellSize)] = points.Count;
-                    pointAccepted = true;
+                    points.Add(candidate);
+                    spawnPoints.Add(candidate);
+                    grid[(int)(candidate.x/cellSize),(int)(candidate.y/cellSize)] = points.Count;
+                    candidateAccepted = true;
                     break;
                 }
             }
 
-            if (!pointAccepted)
+            if (!candidateAccepted)
             {
-                spawnPoints.RemoveAt(index);
+                spawnPoints.RemoveAt(spawnIndex);
             }
         }
-
+        
+        Polygon polygon = new Polygon();
+        foreach (Vector2 point in points)
+        {
+            polygon.Add(new Vertex(point.x,point.y));
+        }
         return polygon;
     }
 
-    private static bool IsValid(Vector2 point, Vector2 s, float cellSize, float r, List<Vector2> points, int[,] grid)
+    private static bool IsValid(Vector2 candidate, int size, float cellSize, float r, List<Vector2> points, int[,] grid)
     {
-        if (point.x >= 0 && point.x < s.x && point.y >= 0 && point.y < s.y)
+        if (candidate.x >= 0 && candidate.x < size && candidate.y >= 0 && candidate.y < size)
         {
-            Vector2Int cell = new Vector2Int((int) (point.x / cellSize), (int) (point.y / cellSize));
-            int searchStartX = Mathf.Max(0, cell.x - 2);
-            int searchEndX = Mathf.Min(cell.x + 2, grid.GetLength(0) - 1);
-            int searchStartY = Mathf.Max(0, cell.y - 2);
-            int searchEndY = Mathf.Min(cell.y + 2, grid.GetLength(1) - 1);
+            Vector2Int cellCoords = new Vector2Int((int) (candidate.x / cellSize), (int) (candidate.y / cellSize));
+            int searchStartX = Mathf.Max(0, cellCoords.x - 2);
+            int searchEndX = Mathf.Min(cellCoords.x + 2, grid.GetLength(0) - 1);
+            int searchStartY = Mathf.Max(0, cellCoords.y - 2);
+            int searchEndY = Mathf.Min(cellCoords.y + 2, grid.GetLength(1) - 1);
 
             for (int x = searchStartX; x <= searchEndX; x++)
             {
-                for (int y = searchStartY; y < searchEndY; y++)
+                for (int y = searchStartY; y <= searchEndY; y++)
                 {
                     int pointIndex = grid[x, y] - 1;
                     if (pointIndex != -1)
                     {
-                        float sqrDst = (point - points[pointIndex]).SqrMagnitude();
+                        float sqrDst = (candidate - points[pointIndex]).SqrMagnitude();
                         if (sqrDst <= r * r)
                         {
                             return false;

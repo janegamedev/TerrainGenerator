@@ -5,16 +5,16 @@ using Random = System.Random;
 
 public static class Noise 
 {
-    public static float[,] GenerateNoiseMap(int size, float scale, int seed, int octaves, float persistance, float lacunarity, Vector2 offset)
+    public static float[,] GenerateNoiseMap(int size, float scale, NoiseData data)
     {
         float[,] noiseMap = new float[size,size];
        
-        Random prng = new Random(seed);
-        Vector2[] octaveOffsets = new Vector2[octaves];
+        Random prng = new Random(data.seed);
+        Vector2[] octaveOffsets = new Vector2[data.octaves];
 
-        for (int i = 0; i < octaves; i++)
+        for (int i = 0; i < data.octaves; i++)
         {
-            octaveOffsets[i] = new Vector2(prng.Next(-100000, 100000) + offset.x,prng.Next(-100000, 100000) + offset.y);
+            octaveOffsets[i] = new Vector2(prng.Next(-100000, 100000) + data.offset.x,prng.Next(-100000, 100000) + data.offset.y);
         }
 
         
@@ -35,7 +35,7 @@ public static class Noise
                 float frequency = 1f;
                 float noiseHeight = 0;
                 
-                for (int i = 0; i < octaves; i++)
+                for (int i = 0; i < data.octaves; i++)
                 {
                     Vector2 sample = new Vector2(x  / scale * frequency + octaveOffsets[i].x, y / scale * frequency + octaveOffsets[i].y);
 
@@ -43,8 +43,8 @@ public static class Noise
                     
                     noiseHeight += perlinValue * amplitude;
 
-                    amplitude *= persistance;
-                    frequency *= lacunarity;
+                    amplitude *= data.persistance;
+                    frequency *= data.lacunarity;
                 }
 
                 if (noiseHeight > maxNoiseHeight)
@@ -71,4 +71,19 @@ public static class Noise
 
         return noiseMap;
     }
+}
+
+[System.Serializable]
+public struct NoiseData
+{
+    public float meshHeightMultiplier;
+    public AnimationCurve meshHeightCurve;
+    [Range(0,10)]
+    public int octaves;
+    [Range(0,1)]
+    public float persistance;
+    [Range(1,3)]
+    public float lacunarity;
+    public int seed;
+    public Vector2 offset;
 }
