@@ -12,7 +12,7 @@ public class MeshData
 
     int triangleIndex;
 
-    public MeshData(TriangleNet.Mesh mesh, float[,] noiseMap, float multiplier) 
+    public MeshData(TriangleNet.Mesh mesh,AnimationCurve heightCurve, float[,] noiseMap, float multiplier) 
     {
         verts = new List<Vector3>();
         normals = new List<Vector3>();
@@ -29,17 +29,17 @@ public class MeshData
             }
             
             Triangle current = trisEnum.Current;
-            AddTriangle(current, noiseMap, multiplier);
+            AddTriangle(current,heightCurve, noiseMap, multiplier);
         }
     }
 
-    private void AddTriangle(Triangle current, float[,] noiseMap, float multiplier) 
+    private void AddTriangle(Triangle current, AnimationCurve heightCurve, float[,] noiseMap, float multiplier) 
     {
         List<float> heights = new List<float>();
         
         for (int j = 0; j < 3; j++)
         {
-            heights.Add(noiseMap[(int) current.vertices[j].x, (int) current.vertices[j].y] * multiplier);
+            heights.Add(heightCurve.Evaluate(noiseMap[(int) current.vertices[j].x, (int) current.vertices[j].y]) * multiplier);
             /*heights[j] = (heights[j] < 0.1f) ? heights[j]* multiplier/10f : heights[j] * multiplier;*/
         }
 

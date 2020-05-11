@@ -5,13 +5,14 @@ using UnityEngine;
 
 public static class PointSampling
 {
-    public static Polygon GeneratePoissonDistribution(float radius, Vector2 size, int n = 30)
+    public static Polygon GeneratePoissonDistribution(float radius, int size, int n = 30)
     {
+        Vector2 mapSize = new Vector2(size,size);
         float cellSize = radius / Mathf.Sqrt(2);
-        int[,] grid = new int[Mathf.CeilToInt(size.x/cellSize),Mathf.CeilToInt(size.y/cellSize)];
+        int[,] grid = new int[Mathf.CeilToInt(size/cellSize),Mathf.CeilToInt(size/cellSize)];
         List<Vector2> points = new List<Vector2>();
         List<Vector2> spawnPoints = new List<Vector2>();
-        spawnPoints.Add(size/2);
+        spawnPoints.Add(mapSize/2);
         Polygon polygon = new Polygon();
         
         while (spawnPoints.Count > 0)
@@ -25,7 +26,7 @@ public static class PointSampling
                 Vector2 dir = new Vector2(Mathf.Sin(angle),Mathf.Cos(angle));
                 Vector2 point = spawnCenter + dir * Random.Range(radius, 2 * radius);
 
-                if (IsValid(point, size, cellSize, radius, points, grid))
+                if (IsValid(point, mapSize, cellSize, radius, points, grid))
                 {
                     polygon.Add(new Vertex(point.x,point.y));
                     
@@ -78,13 +79,13 @@ public static class PointSampling
         return false;
     }
 
-    public static Polygon GenerateRandomDistribution(Vector2 size, int density)
+    public static Polygon GenerateRandomDistribution(int size, int density)
     {
         Polygon polygon = new Polygon();
         
         for (int i = 0; i < density; i++)
         {
-            Vector2 p = new Vector2( Random.Range(.0f, size.x), Random.Range(.0f, size.y));
+            Vector2 p = new Vector2( Random.Range(.0f, size), Random.Range(.0f, size));
 
             polygon.Add( new Vertex(p.x, p.y));
         }

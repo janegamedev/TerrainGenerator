@@ -3,12 +3,33 @@
 [RequireComponent(typeof(MeshGenerator), typeof(MapDisplay), typeof(MeshGenerator))]
 public class MapGenerator : MonoBehaviour
 {
-    public Vector2Int mapSize;
+    #region SIZE
+
+    [Header("Size")] 
+    
+    private const int mapChunkSize = 241;
+    [Range(0,6)]
+    public int levelOfDetail;
     [Range(0.0001f, 10000f)]
     public float noiseScale;
-    public bool autoUpdate;
+    
+    #endregion
 
-    public float meshHeight;
+    #region GENERAL
+
+    public bool autoUpdate;
+    
+    #region SAMPLING
+
+    [Header("Point sampling")] 
+    public DistributionData distributionData;
+
+    #endregion
+
+    #endregion
+    
+    public float meshHeightMultiplier;
+    public AnimationCurve meshHeightCurve;
     [Range(0,10)]
     public int octaves;
     [Range(0,1)]
@@ -18,12 +39,6 @@ public class MapGenerator : MonoBehaviour
     public int seed;
     public Vector2 offset;
     
-    #region SAMPLING
-
-    [Header("Point sampling")] 
-    public DistributionData distributionData;
-
-    #endregion
     
     private MapDisplay _mapDisplay;
 
@@ -36,11 +51,11 @@ public class MapGenerator : MonoBehaviour
             _mapDisplay = GetComponent<MapDisplay>();
         }
         
-        float[,] noiseMap = Noise.GenerateNoiseMap(mapSize, noiseScale, seed, octaves, persistance, lacunarity, offset);
+        float[,] noiseMap = Noise.GenerateNoiseMap(mapChunkSize, noiseScale, seed, octaves, persistance, lacunarity, offset);
         
-        TriangleNet.Mesh mesh = MeshGenerator.GenerateTris(mapSize, distributionData);
+        TriangleNet.Mesh mesh = MeshGenerator.GenerateTris(mapChunkSize, distributionData, levelOfDetail);
         Color[] colors = _mapDisplay.GenerateNoiseColors(mesh, noiseMap);
-        _meshData = MeshGenerator.GenerateTerrainMesh(mesh, noiseMap, meshHeight);
+        _meshData = MeshGenerator.GenerateTerrainMesh(mesh,meshHeightCurve, noiseMap, meshHeightMultiplier);
         _meshData.AddColors(colors);
         UnityEngine.Mesh m = _meshData.CreateMesh();
         _mapDisplay.DisplayMesh(m);
@@ -48,12 +63,6 @@ public class MapGenerator : MonoBehaviour
     
     void OnValidate() 
     {
-        if (mapSize.x < 1) {
-            mapSize.x = 1;
-        }
-        if (mapSize.y < 1) {
-            mapSize.y = 1;
-        }
         if (lacunarity < 1) {
             lacunarity = 1;
         }
@@ -64,7 +73,7 @@ public class MapGenerator : MonoBehaviour
 public struct DistributionData
 {
     public Distribution distribution;
-    [Range(4, 6000)]
+    [Range(500, 6000)]
     public int pointDensity;
     [Range(10,150)]
     public float radius;

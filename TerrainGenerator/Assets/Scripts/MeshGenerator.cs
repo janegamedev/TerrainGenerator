@@ -1,36 +1,29 @@
 ﻿using System;
-using System.Collections.Generic;
 using TriangleNet.Geometry;
 using TriangleNet.Meshing;
-using TriangleNet.Topology;
 using UnityEngine;
 using Mesh = TriangleNet.Mesh;
 
 public static class MeshGenerator
 {
-    public static MeshData GenerateTerrainMesh(Mesh mesh, float[,] noiseMap, float multiplier)
+    public static MeshData GenerateTerrainMesh(Mesh mesh, AnimationCurve heightCurve, float[,] noiseMap, float multiplier)
     {
-        int width = noiseMap.GetLength (0);
-        int height = noiseMap.GetLength (1);
-        float topLeftX = (width - 1) / -2f;
-        float topLeftZ = (height - 1) / 2f;
-
-
-        MeshData meshData = new MeshData(mesh, noiseMap, multiplier);
+        MeshData meshData = new MeshData(mesh, heightCurve, noiseMap, multiplier);
         return meshData;
     }
 
-    public static Mesh GenerateTris(Vector2Int mapSize , DistributionData data)
+    public static Mesh GenerateTris(int size, DistributionData data, int levelOfDetail)
     {
         Polygon polygon = new Polygon();
+        int meshSimplificationIncrement = (levelOfDetail == 0)?1:levelOfDetail * 4;
         
         switch (data.distribution)
         {
             case Distribution.RANDOM:
-                polygon = PointSampling.GenerateRandomDistribution(mapSize, data.pointDensity);
+                polygon = PointSampling.GenerateRandomDistribution(size, data.pointDensity/meshSimplificationIncrement);
                 break;
             case Distribution.POISSON:
-                polygon = PointSampling.GeneratePoissonDistribution(data.radius, mapSize, data.rejectionSamples);
+                polygon = PointSampling.GeneratePoissonDistribution(data.radius, size, data.rejectionSamples);
                 break;
             default:
                 throw new ArgumentOutOfRangeException();
