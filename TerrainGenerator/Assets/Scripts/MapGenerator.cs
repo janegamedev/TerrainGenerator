@@ -7,7 +7,7 @@ public class MapGenerator : MonoBehaviour
 
     [Header("Size")] 
     
-    private const int mapChunkSize = 241;
+    public const int MAP_CHUNK_SIZE = 241;
     [Range(0,6)]
     public int levelOfDetail;
     [Range(0.0001f, 10000f)]
@@ -51,9 +51,9 @@ public class MapGenerator : MonoBehaviour
             _mapDisplay = GetComponent<MapDisplay>();
         }
         
-        float[,] noiseMap = Noise.GenerateNoiseMap(mapChunkSize, noiseScale, seed, octaves, persistance, lacunarity, offset);
+        float[,] noiseMap = Noise.GenerateNoiseMap(MAP_CHUNK_SIZE, noiseScale, seed, octaves, persistance, lacunarity, offset);
         
-        TriangleNet.Mesh mesh = MeshGenerator.GenerateTris(mapChunkSize, distributionData, levelOfDetail);
+        TriangleNet.Mesh mesh = MeshGenerator.GenerateTris(MAP_CHUNK_SIZE, distributionData, levelOfDetail);
         Color[] colors = _mapDisplay.GenerateNoiseColors(mesh, noiseMap);
         _meshData = MeshGenerator.GenerateTerrainMesh(mesh,meshHeightCurve, noiseMap, meshHeightMultiplier);
         _meshData.AddColors(colors);
