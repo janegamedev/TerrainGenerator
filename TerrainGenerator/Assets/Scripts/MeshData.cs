@@ -32,6 +32,7 @@ public class MeshData
             AddTriangle(current,heightCurve, noiseMap, multiplier);
         }
     }
+    
 
     private void AddTriangle(Triangle current, AnimationCurve heightCurve, float[,] noiseMap, float multiplier) 
     {

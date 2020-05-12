@@ -10,15 +10,13 @@ public class MapGenerator : MonoBehaviour
     public int mapSize = 241;
     [Range(0,6)]
     public int levelOfDetail;
-    [Range(0.0001f, 10000f)]
-    public float noiseScale;
+
     #endregion
 
     #region GENERAL
     [Header("General settings")]
     
     public bool autoUpdate;
-    public bool generateWater;
     public bool island;
     #endregion
     
@@ -34,6 +32,17 @@ public class MapGenerator : MonoBehaviour
     public NoiseData noiseData;
     
     #endregion
+
+    #region WATER
+
+    [Header("Water settings")] 
+    public WaterGenerator waterGenerator;
+    public float waterLevel;
+    public bool generateWater;
+    [HideInInspector] public bool dynamicWater;
+    [HideInInspector] public bool dynamicWaves;
+
+    #endregion
     
     private MapDisplay _mapDisplay;
     private MeshData _meshData;
@@ -45,16 +54,28 @@ public class MapGenerator : MonoBehaviour
             _mapDisplay = GetComponent<MapDisplay>();
         }
         
-        float[,] noiseMap = Noise.GenerateNoiseMap(mapSize, noiseScale, noiseData);
+        float[,] noiseMap = Noise.GenerateNoiseMap(mapSize, noiseData);
         
         TriangleNet.Mesh mesh = MeshGenerator.GenerateTris(mapSize, distributionData, levelOfDetail);
         Color[] colors = _mapDisplay.GenerateNoiseColors(mesh, noiseMap);
-        _meshData = MeshGenerator.GenerateTerrainMesh(mesh,noiseData.meshHeightCurve, noiseMap, noiseData.meshHeightMultiplier);
+        _meshData = MeshGenerator.GenerateMesh(mesh,noiseData.meshHeightCurve, noiseMap, noiseData.meshHeightMultiplier);
         _meshData.AddColors(colors);
         UnityEngine.Mesh m = _meshData.CreateMesh();
         _mapDisplay.DisplayMesh(m);
+
+        if (waterGenerator != null)
+        {
+            if (generateWater)
+            {
+                waterGenerator.Init(mapSize, waterLevel,dynamicWater,dynamicWaves,distributionData, levelOfDetail);
+            }
+            else
+            {
+                waterGenerator.Clear();
+            }
+        }
     }
-    
+
 }
 
 public enum Distribution

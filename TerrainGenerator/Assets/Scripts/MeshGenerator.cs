@@ -6,7 +6,7 @@ using Mesh = TriangleNet.Mesh;
 
 public static class MeshGenerator
 {
-    public static MeshData GenerateTerrainMesh(Mesh mesh, AnimationCurve heightCurve, float[,] noiseMap, float multiplier)
+    public static MeshData GenerateMesh(Mesh mesh, AnimationCurve heightCurve, float[,] noiseMap, float multiplier)
     {
         MeshData meshData = new MeshData(mesh, heightCurve, noiseMap, multiplier);
         return meshData;

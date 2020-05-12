@@ -61,4 +61,12 @@ public class MapDisplay : MonoBehaviour
         _meshRenderer.material = material;
     }
 
+    public void ClearMesh()
+    {
+        if (_meshFilter.sharedMesh != null)
+        {
+            _meshFilter.sharedMesh = null;
+        }
+    }
+
 }

@@ -5,7 +5,7 @@ using Random = System.Random;
 
 public static class Noise 
 {
-    public static float[,] GenerateNoiseMap(int size, float scale, NoiseData data)
+    public static float[,] GenerateNoiseMap(int size, NoiseData data)
     {
         float[,] noiseMap = new float[size,size];
        
@@ -23,8 +23,8 @@ public static class Noise
 
         int halfSize = size / 2;
         
-        if (scale <= 0) {
-            scale = 0.0001f;
+        if (data.noiseScale <= 0) {
+            data.noiseScale = 0.0001f;
         }
 
         for (int y = 0; y < size; y++) 
@@ -37,7 +37,7 @@ public static class Noise
                 
                 for (int i = 0; i < data.octaves; i++)
                 {
-                    Vector2 sample = new Vector2(x  / scale * frequency + octaveOffsets[i].x, y / scale * frequency + octaveOffsets[i].y);
+                    Vector2 sample = new Vector2(x  / data.noiseScale * frequency + octaveOffsets[i].x, y / data.noiseScale * frequency + octaveOffsets[i].y);
 
                     float perlinValue = Mathf.PerlinNoise (sample.x, sample.y);
                     
@@ -73,9 +73,12 @@ public static class Noise
     }
 }
 
+
 [System.Serializable]
 public struct NoiseData
 {
+    [Range(0.0001f, 10000f)]
+    public float noiseScale;
     public float meshHeightMultiplier;
     public AnimationCurve meshHeightCurve;
     [Range(0,10)]
@@ -87,3 +90,4 @@ public struct NoiseData
     public int seed;
     public Vector2 offset;
 }
+
