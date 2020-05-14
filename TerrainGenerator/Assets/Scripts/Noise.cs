@@ -88,13 +88,14 @@ public struct NoiseData
 {
     [Range(0.0001f, 10000f)]
     public float noiseScale;
+    [Range(0.0001f, 300)]
     public float meshHeightMultiplier;
     public AnimationCurve meshHeightCurve;
-    [Range(0,10)]
+    [Range(1,5)]
     public int octaves;
     [Range(0,1)]
     public float persistance;
-    [Range(1,3)]
+    [Range(1,5)]
     public float lacunarity;
     public int seed;
     public Vector2 offset;

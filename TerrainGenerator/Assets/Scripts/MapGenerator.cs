@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using UnityEngine.Serialization;
 
 [RequireComponent( typeof(MapDisplay))]
 public class MapGenerator : MonoBehaviour
@@ -8,8 +9,6 @@ public class MapGenerator : MonoBehaviour
     
     [Range(240, 1000)]
     public int mapSize = 241;
-    [Range(0,6)]
-    public int levelOfDetail;
 
     #endregion
 
@@ -17,10 +16,10 @@ public class MapGenerator : MonoBehaviour
     [Header("General settings")]
     
     public bool autoUpdate;
+    public bool generateWater;
     public bool island;
     [Range(.5f,2)]
-    public float islandMultiplier;
-    public bool generateWater;
+    public float islandSizeMultiplier;
     #endregion
     
     #region SAMPLING
@@ -56,9 +55,9 @@ public class MapGenerator : MonoBehaviour
             _mapDisplay = GetComponent<MapDisplay>();
         }
         
-        float[,] noiseMap = Noise.GenerateNoiseMap(mapSize, noiseData, island, islandMultiplier);
+        float[,] noiseMap = Noise.GenerateNoiseMap(mapSize, noiseData, island, islandSizeMultiplier);
         
-        TriangleNet.Mesh mesh = MeshGenerator.GenerateTris(mapSize, distributionData, levelOfDetail);
+        TriangleNet.Mesh mesh = MeshGenerator.GenerateTris(mapSize, distributionData);
         Color[] colors = _mapDisplay.GenerateNoiseColors(mesh, noiseMap);
         _meshData = MeshGenerator.GenerateMesh(mesh,noiseData.meshHeightCurve, noiseMap, noiseData.meshHeightMultiplier);
         _meshData.AddColors(colors);
@@ -69,7 +68,7 @@ public class MapGenerator : MonoBehaviour
         {
             if (generateWater)
             {
-                waterGenerator.Init(mapSize, waterLevel,dynamicWater,dynamicWaves,distributionData, levelOfDetail);
+                waterGenerator.Init(mapSize, waterLevel,dynamicWater,dynamicWaves,distributionData);
             }
             else
             {

@@ -6,14 +6,10 @@ public struct DistributionData
     public Distribution distribution;
 
     [Range(500,1000)]
-    public int minPointDensity;
-    [Range(5000, 6000)]
-    public int maxPointDensity;
+    public int pointDensity;
 
-    [Range(3,7)]
-    public float minRadius;
-    [Range(9,15)]
-    public float maxRadius;
+    [Range(7,30)]
+    public float radius;
     
     [Range(5,50)] 
     public int rejectionSamples;

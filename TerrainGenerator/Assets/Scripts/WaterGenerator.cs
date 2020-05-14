@@ -7,12 +7,11 @@ public class WaterGenerator : MonoBehaviour
     public NoiseData data;
 
     private DistributionData _distributionData;
-    private int _levelOfDetail;
     private int _size;
     private Vector3[] _verts;
     private MeshData _meshData;
 
-    public void Init(int size, float level, bool water, bool waves, DistributionData data, int details)
+    public void Init(int size, float level, bool water, bool waves, DistributionData data)
     {
         if (_mapDisplay == null)
         {
@@ -23,7 +22,7 @@ public class WaterGenerator : MonoBehaviour
         
         _size = size;
         _distributionData = data;
-        _levelOfDetail = details;
+
         GenerateWater();
     }
 
@@ -31,7 +30,7 @@ public class WaterGenerator : MonoBehaviour
     {
         float[,] noiseMap = Noise.GenerateNoiseMap(_size, data, false, 0);
         
-        TriangleNet.Mesh mesh = MeshGenerator.GenerateTris(_size, _distributionData, _levelOfDetail);
+        TriangleNet.Mesh mesh = MeshGenerator.GenerateTris(_size, _distributionData);
         Color[] colors = _mapDisplay.GenerateNoiseColors(mesh, noiseMap);
         _meshData = MeshGenerator.GenerateMesh(mesh,data.meshHeightCurve, noiseMap, data.meshHeightMultiplier);
         _meshData.AddColors(colors);
