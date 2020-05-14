@@ -18,6 +18,9 @@ public class MapGenerator : MonoBehaviour
     
     public bool autoUpdate;
     public bool island;
+    [Range(.5f,2)]
+    public float islandMultiplier;
+    public bool generateWater;
     #endregion
     
     #region SAMPLING
@@ -38,7 +41,6 @@ public class MapGenerator : MonoBehaviour
     [Header("Water settings")] 
     public WaterGenerator waterGenerator;
     public float waterLevel;
-    public bool generateWater;
     [HideInInspector] public bool dynamicWater;
     [HideInInspector] public bool dynamicWaves;
 
@@ -54,7 +56,7 @@ public class MapGenerator : MonoBehaviour
             _mapDisplay = GetComponent<MapDisplay>();
         }
         
-        float[,] noiseMap = Noise.GenerateNoiseMap(mapSize, noiseData);
+        float[,] noiseMap = Noise.GenerateNoiseMap(mapSize, noiseData, island, islandMultiplier);
         
         TriangleNet.Mesh mesh = MeshGenerator.GenerateTris(mapSize, distributionData, levelOfDetail);
         Color[] colors = _mapDisplay.GenerateNoiseColors(mesh, noiseMap);

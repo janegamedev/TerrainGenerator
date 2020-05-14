@@ -3,10 +3,6 @@
 public class WaterGenerator : MonoBehaviour
 {
     private MapDisplay _mapDisplay;
-
-    public bool dynamicWater;
-    public bool dynamicWaves;
-
     public float speed;
     public NoiseData data;
 
@@ -26,8 +22,6 @@ public class WaterGenerator : MonoBehaviour
         transform.position = new Vector3(transform.position.x, level, transform.position.z);
         
         _size = size;
-        dynamicWater = water;
-        dynamicWaves = waves;
         _distributionData = data;
         _levelOfDetail = details;
         GenerateWater();
@@ -35,7 +29,7 @@ public class WaterGenerator : MonoBehaviour
 
     public void GenerateWater()
     {
-        float[,] noiseMap = Noise.GenerateNoiseMap(_size, data);
+        float[,] noiseMap = Noise.GenerateNoiseMap(_size, data, false, 0);
         
         TriangleNet.Mesh mesh = MeshGenerator.GenerateTris(_size, _distributionData, _levelOfDetail);
         Color[] colors = _mapDisplay.GenerateNoiseColors(mesh, noiseMap);
@@ -45,24 +39,9 @@ public class WaterGenerator : MonoBehaviour
         _mapDisplay.DisplayMesh(m);
     }
 
-    void Update ()
-    {
-        if (dynamicWaves)
-        {
-            data.offset += data.offset * (speed * Time.deltaTime);
-        }
-        
-        GenerateWater();
-    }
-
     public void Clear()
     {
         _mapDisplay.ClearMesh();
     }
 }
 
-public enum WaveDirection
-{
-    X,
-    Y
-}

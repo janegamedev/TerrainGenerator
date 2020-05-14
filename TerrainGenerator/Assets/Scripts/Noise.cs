@@ -1,11 +1,12 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Random = System.Random;
 
 public static class Noise 
 {
-    public static float[,] GenerateNoiseMap(int size, NoiseData data)
+    public static float[,] GenerateNoiseMap(int size, NoiseData data, bool island, float value)
     {
         float[,] noiseMap = new float[size,size];
        
@@ -57,18 +58,26 @@ public static class Noise
                 }
                 noiseMap [x, y] = noiseHeight;
             }
-
-           
         }
         
         for (int y = 0; y < size; y++)
         {
             for (int x = 0; x < size; x++)
             {
+                if (island)
+                {
+                    Vector2 center = new Vector2(size * .5f, size *.5f);
+                    float distance = Vector2.Distance(center, new Vector2(x, y));
+                    float maxWidth = center.x * value;
+                    float gradient =Mathf.Pow(distance / maxWidth, 2);
+
+                    noiseMap[x, y] *= Mathf.Max(0.0f, 1.0f - gradient);
+                }
+                
                 noiseMap[x, y] = Mathf.InverseLerp(minNoiseHeight, maxNoiseHeight, noiseMap[x, y]);
             }
         }
-
+        
         return noiseMap;
     }
 }
