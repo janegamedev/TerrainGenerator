@@ -3,7 +3,6 @@
 public class WaterGenerator : MonoBehaviour
 {
     private MapDisplay _mapDisplay;
-    public float speed;
     public NoiseData data;
 
     private DistributionData _distributionData;

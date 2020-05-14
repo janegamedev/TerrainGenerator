@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 using UnityEngine.Serialization;
 
 [RequireComponent( typeof(MapDisplay))]
@@ -74,7 +75,6 @@ public class MapGenerator : MonoBehaviour
             }
         }
     }
-
 }
 
 public enum DistributionType
