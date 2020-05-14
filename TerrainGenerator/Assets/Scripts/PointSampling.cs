@@ -12,7 +12,6 @@ public static class PointSampling
         int[,] grid = new int[Mathf.CeilToInt(size/cellSize),Mathf.CeilToInt(size/cellSize)];
         List<Vector2> points = new List<Vector2>();
         List<Vector2> spawnPoints = new List<Vector2> {Vector2.one * size / 2};
-
         
         while (spawnPoints.Count > 0)
         {

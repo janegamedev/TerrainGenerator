@@ -1,9 +1,10 @@
 using UnityEngine;
+using UnityEngine.Serialization;
 
 [System.Serializable]
 public struct DistributionData
 {
-    public Distribution distribution;
+    [FormerlySerializedAs("distribution")] public DistributionType distributionType;
 
     [Range(500,1000)]
     public int pointDensity;

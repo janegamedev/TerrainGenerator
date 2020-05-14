@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Serialization;
 using Random = System.Random;
 
 public static class Noise 
@@ -44,7 +45,24 @@ public static class Noise
                     
                     noiseHeight += perlinValue * amplitude;
 
-                    amplitude *= data.persistance;
+                    switch (data.persistenceType)
+                    {
+                        case PersistenceType.Quarter:
+                            amplitude *= 1/4f;
+                            break;
+                        case PersistenceType.Half:
+                            amplitude *= .5f;
+                            break;
+                        case PersistenceType.Sqrt:
+                            amplitude *= 1 / Mathf.Sqrt(2);
+                            break;
+                        case PersistenceType.Default:
+                            amplitude *= 1;
+                            break;
+                        default:
+                            throw new ArgumentOutOfRangeException();
+                    }
+                    /*amplitude *= data.persistence;*/
                     frequency *= data.lacunarity;
                 }
 
@@ -93,11 +111,19 @@ public struct NoiseData
     public AnimationCurve meshHeightCurve;
     [Range(1,5)]
     public int octaves;
-    [Range(0,1)]
-    public float persistance;
+
+    public PersistenceType persistenceType;
     [Range(1,5)]
     public float lacunarity;
     public int seed;
     public Vector2 offset;
+}
+
+public enum PersistenceType
+{
+    Quarter,
+    Half,
+    Sqrt,
+    Default
 }
 
