@@ -30,8 +30,8 @@ public class WaterGenerator : MonoBehaviour
         float[,] noiseMap = Noise.GenerateNoiseMap(_size, data, false, 0);
         
         TriangleNet.Mesh mesh = MeshGenerator.GenerateTriangulatedMesh(_size, _distributionData);
-        Color[] colors = _mapDisplay.GenerateNoiseColors(mesh, noiseMap);
         _meshData = MeshGenerator.GenerateMeshData(mesh,data.meshHeightCurve, noiseMap, data.meshHeightMultiplier);
+        Color[] colors = _mapDisplay.GenerateColors(mesh, noiseMap);
         _meshData.AddColors(colors);
         UnityEngine.Mesh m = _meshData.CreateMesh();
         _mapDisplay.DisplayMesh(m);

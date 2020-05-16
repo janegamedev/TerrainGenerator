@@ -1,6 +1,7 @@
 ﻿using System;
 using UnityEditor;
 using UnityEngine;
+using Random = System.Random;
 
 [CustomEditor(typeof(MapGenerator))]
 public class MapGeneratorEditor : Editor
@@ -11,25 +12,38 @@ public class MapGeneratorEditor : Editor
 
         EditorGUI.BeginChangeCheck();
         EditorGUILayout.LabelField("Size", EditorStyles.boldLabel);
-        EditorGUILayout.Space();
         mapGen.mapSize = EditorGUILayout.IntSlider("Map size:", mapGen.mapSize, 100, 1000);
         EditorGUILayout.Space();
 
         EditorGUILayout.LabelField("General settings", EditorStyles.boldLabel);
-        EditorGUILayout.Space();
         mapGen.autoUpdate = GUILayout.Toggle(mapGen.autoUpdate, "Auto update");
         mapGen.generateWater = GUILayout.Toggle(mapGen.generateWater, "Generate water");
-        mapGen.island = GUILayout.Toggle(mapGen.island, "Make island");
+        
+        if (mapGen.generateWater)
+        {
+            EditorGUILayout.Space();
+            EditorGUILayout.LabelField("Water settings", EditorStyles.boldLabel);
+
+            mapGen.waterGenerator =
+                EditorGUILayout.ObjectField("Water generator:", mapGen.waterGenerator, typeof(WaterGenerator), true) as
+                    WaterGenerator;
+            mapGen.waterLevel = EditorGUILayout.Slider("Water level:", mapGen.waterLevel, 0.01f, 5f);
+            EditorGUILayout.Space();
+        }
+        
+        mapGen.island = GUILayout.Toggle(mapGen.island, "Generate island:");
 
         if (mapGen.island)
         {
+            EditorGUILayout.Space();
+            EditorGUILayout.LabelField("Island settings", EditorStyles.boldLabel);
             mapGen.islandSizeMultiplier = EditorGUILayout.Slider("Island size:", mapGen.islandSizeMultiplier, .5f, 2);
+            mapGen.islandMin = EditorGUILayout.Slider("Island fallout:", mapGen.islandMin, 0, 1);
         }
 
         EditorGUILayout.Space();
 
         EditorGUILayout.LabelField("Point sampling", EditorStyles.boldLabel);
-        EditorGUILayout.Space();
         mapGen.distributionData.distributionType =
             (DistributionType) EditorGUILayout.EnumPopup("Vertex distribution type:",
                 mapGen.distributionData.distributionType);
@@ -53,7 +67,6 @@ public class MapGeneratorEditor : Editor
         EditorGUILayout.Space();
 
         EditorGUILayout.LabelField("Noise settings", EditorStyles.boldLabel);
-        EditorGUILayout.Space();
         mapGen.noiseData.meshHeightMultiplier =
             EditorGUILayout.Slider("Mesh height:", mapGen.noiseData.meshHeightMultiplier, 0.0001f, 300);
         mapGen.noiseData.noiseScale =
@@ -68,21 +81,17 @@ public class MapGeneratorEditor : Editor
         mapGen.noiseData.offset = EditorGUILayout.Vector2Field("Offset:", mapGen.noiseData.offset);
         EditorGUILayout.Space();
 
-        if (mapGen.generateWater)
+
+
+        EditorGUILayout.BeginHorizontal();
+        if (GUILayout.Button("Generate random seed"))
         {
-            EditorGUILayout.LabelField("Water settings", EditorStyles.boldLabel);
-            EditorGUILayout.Space();
-
-            mapGen.waterGenerator =
-                EditorGUILayout.ObjectField("Water generator:", mapGen.waterGenerator, typeof(WaterGenerator), true) as
-                    WaterGenerator;
-            mapGen.waterLevel = EditorGUILayout.Slider("Water level:", mapGen.waterLevel, -2f, 5f);
-            EditorGUILayout.Space();
+            mapGen.GenerateRandomSeed();
         }
-
         if (mapGen.autoUpdate && EditorGUI.EndChangeCheck()||GUILayout.Button ("Generate"))
         {
             mapGen.GenerateMap ();
         }
+        EditorGUILayout.EndHorizontal();
     }
 }

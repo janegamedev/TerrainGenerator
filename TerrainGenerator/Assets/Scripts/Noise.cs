@@ -18,14 +18,12 @@ public static class Noise
         {
             octaveOffsets[i] = new Vector2(prng.Next(-100000, 100000) + data.offset.x,prng.Next(-100000, 100000) + data.offset.y);
         }
-
         
         float maxNoiseHeight = float.NegativeInfinity;
         float minNoiseHeight = float.PositiveInfinity;
 
-        int halfSize = size / 2;
-        
-        if (data.noiseScale <= 0) {
+        if (data.noiseScale <= 0) 
+        {
             data.noiseScale = 0.0001f;
         }
 
@@ -62,7 +60,6 @@ public static class Noise
                         default:
                             throw new ArgumentOutOfRangeException();
                     }
-                    /*amplitude *= data.persistence;*/
                     frequency *= data.lacunarity;
                 }
 
@@ -74,6 +71,17 @@ public static class Noise
                 {
                     minNoiseHeight = noiseHeight;
                 }
+                
+                if (island)
+                {
+                    Vector2 center = new Vector2(size * .5f, size *.5f);
+                    float distance = Vector2.Distance(center, new Vector2(x, y));
+                    float maxWidth = center.x * value;
+                    float gradient = Mathf.Pow(distance / maxWidth, 2);
+
+                    noiseHeight *= Mathf.Max(0.0f, 1.0f - gradient);
+                }
+                
                 noiseMap [x, y] = noiseHeight;
             }
         }
@@ -82,16 +90,6 @@ public static class Noise
         {
             for (int x = 0; x < size; x++)
             {
-                if (island)
-                {
-                    Vector2 center = new Vector2(size * .5f, size *.5f);
-                    float distance = Vector2.Distance(center, new Vector2(x, y));
-                    float maxWidth = center.x * value;
-                    float gradient =Mathf.Pow(distance / maxWidth, 2);
-
-                    noiseMap[x, y] *= Mathf.Max(0.0f, 1.0f - gradient);
-                }
-                
                 noiseMap[x, y] = Mathf.InverseLerp(minNoiseHeight, maxNoiseHeight, noiseMap[x, y]);
             }
         }
@@ -100,30 +98,4 @@ public static class Noise
     }
 }
 
-
-[System.Serializable]
-public struct NoiseData
-{
-    [Range(0.0001f, 10000f)]
-    public float noiseScale;
-    [Range(0.0001f, 300)]
-    public float meshHeightMultiplier;
-    public AnimationCurve meshHeightCurve;
-    [Range(1,5)]
-    public int octaves;
-
-    public PersistenceType persistenceType;
-    [Range(1,5)]
-    public float lacunarity;
-    public int seed;
-    public Vector2 offset;
-}
-
-public enum PersistenceType
-{
-    Quarter,
-    Half,
-    Sqrt,
-    Default
-}
 

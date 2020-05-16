@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using TriangleNet.Topology;
 using UnityEngine;
+using static UnityEngine.Color;
 
 public class MeshData
 {
@@ -10,18 +11,22 @@ public class MeshData
     public List<int> tris;
     public Color[] colors;
 
-    int triangleIndex;
+    public TriangleNet.Mesh netMesh;
+    private UnityEngine.Mesh mesh;
+    private float ground;
+    private bool isIsland;
 
-    public MeshData(TriangleNet.Mesh mesh,AnimationCurve heightCurve, float[,] noiseMap, float multiplier) 
+    public MeshData(TriangleNet.Mesh m,AnimationCurve heightCurve, float[,] noiseMap, float multiplier)
     {
+        isIsland = false;
         verts = new List<Vector3>();
         normals = new List<Vector3>();
         uvs = new List<Vector2>();
         tris = new List<int>();
-        
-        IEnumerator<Triangle> trisEnum = mesh.Triangles.GetEnumerator();
 
-        for (int i = 0; i < mesh.Triangles.Count; i++)
+        IEnumerator<Triangle> trisEnum = m.Triangles.GetEnumerator();
+
+        for (int i = 0; i < m.Triangles.Count; i++)
         {
             if (!trisEnum.MoveNext())
             {
@@ -33,6 +38,32 @@ public class MeshData
         }
     }
     
+    public MeshData(TriangleNet.Mesh m,AnimationCurve heightCurve, float[,] noiseMap, float multiplier, float islandGround)
+    {
+        isIsland = true;
+        ground = islandGround;
+       
+        verts = new List<Vector3>();
+        normals = new List<Vector3>();
+        uvs = new List<Vector2>();
+        tris = new List<int>();
+
+        IEnumerator<Triangle> trisEnum = m.Triangles.GetEnumerator();
+
+        for (int i = 0; i < m.Triangles.Count; i++)
+        {
+            if (!trisEnum.MoveNext())
+            {
+                break;
+            }
+            
+            Triangle current = trisEnum.Current;
+            AddTriangle(current,heightCurve, noiseMap, multiplier);
+        }
+
+        mesh = CreateMesh();
+        netMesh = MeshGenerator.GetMeshFromMesh(mesh);
+    }
 
     private void AddTriangle(Triangle current, AnimationCurve heightCurve, float[,] noiseMap, float multiplier) 
     {
@@ -41,7 +72,14 @@ public class MeshData
         for (int j = 0; j < 3; j++)
         {
             heights.Add(heightCurve.Evaluate(noiseMap[(int) current.vertices[j].x, (int) current.vertices[j].y]) * multiplier);
-            /*heights[j] = (heights[j] < 0.1f) ? heights[j]* multiplier/10f : heights[j] * multiplier;*/
+        }
+
+        if (isIsland)
+        {
+            if (!IsValidForIsland(heights))
+            {
+                return;
+            }
         }
 
         Vector3 v0 = new Vector3((float) current.vertices[2].x,heights[2], (float) current.vertices[2].y);
@@ -65,21 +103,40 @@ public class MeshData
         }
     }
 
-    public Mesh CreateMesh() 
+    private bool IsValidForIsland(List<float> height)
+    {
+        float h = (height[0] + height[1] + height[2]) / 3;
+
+        if (h < ground)
+        {
+            return false;
+        }
+        
+        return true;
+    }
+
+    public UnityEngine.Mesh CreateMesh()
     {
         UnityEngine.Mesh m = new UnityEngine.Mesh();
         m.vertices = verts.ToArray();
         m.normals = normals.ToArray();
         m.triangles = tris.ToArray();
         m.uv = uvs.ToArray();
-        m.colors = colors;
+        
+        if (colors == null)
+        {
+            colors = new Color[verts.Count];
+        }
+        else
+        {
+            m.colors = colors;
+        }
         
         return m;
     }
 
     public void AddColors(Color[] c)
     {
-        this.colors = c;
+        colors = c;
     }
-
 }

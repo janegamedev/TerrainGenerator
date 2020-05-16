@@ -1,6 +1,8 @@
 ﻿using System;
 using UnityEngine;
 using UnityEngine.Serialization;
+using Mesh = TriangleNet.Mesh;
+using Random = UnityEngine.Random;
 
 [RequireComponent( typeof(MapDisplay))]
 public class MapGenerator : MonoBehaviour
@@ -19,8 +21,10 @@ public class MapGenerator : MonoBehaviour
     public bool autoUpdate;
     public bool generateWater;
     public bool island;
+    public bool generateBottom;
     [Range(.5f,2)]
     public float islandSizeMultiplier;
+    public float islandMin = 0.5f;
     #endregion
     
     #region SAMPLING
@@ -46,6 +50,7 @@ public class MapGenerator : MonoBehaviour
     
     private MapDisplay _mapDisplay;
     private MeshData _meshData;
+    private Mesh _netMesh;
 
     public void GenerateMap() 
     {
@@ -55,10 +60,17 @@ public class MapGenerator : MonoBehaviour
         }
         
         float[,] noiseMap = Noise.GenerateNoiseMap(mapSize, noiseData, island, islandSizeMultiplier);
+    
+        _netMesh = MeshGenerator.GenerateTriangulatedMesh(mapSize, distributionData);
+    
+        if (island)
+        {
+            _meshData = MeshGenerator.GenerateMeshData(_netMesh,noiseData.meshHeightCurve, noiseMap, noiseData.meshHeightMultiplier, islandMin);
+            _netMesh = _meshData.netMesh;
+        }
         
-        TriangleNet.Mesh mesh = MeshGenerator.GenerateTriangulatedMesh(mapSize, distributionData);
-        Color[] colors = _mapDisplay.GenerateNoiseColors(mesh, noiseMap);
-        _meshData = MeshGenerator.GenerateMeshData(mesh,noiseData.meshHeightCurve, noiseMap, noiseData.meshHeightMultiplier);
+        _meshData = MeshGenerator.GenerateMeshData(_netMesh,noiseData.meshHeightCurve, noiseMap, noiseData.meshHeightMultiplier);
+        Color[] colors = _mapDisplay.GenerateColors(_netMesh, noiseMap);
         _meshData.AddColors(colors);
         UnityEngine.Mesh m = _meshData.CreateMesh();
         _mapDisplay.DisplayMesh(m);
@@ -74,6 +86,11 @@ public class MapGenerator : MonoBehaviour
                 waterGenerator.Clear();
             }
         }
+    }
+
+    public void GenerateRandomSeed()
+    {
+        noiseData.seed = Random.Range(0, 1000000);
     }
 }
 

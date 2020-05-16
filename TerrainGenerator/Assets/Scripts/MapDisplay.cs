@@ -12,7 +12,7 @@ public class MapDisplay : MonoBehaviour
     private MeshFilter _meshFilter;
     private MeshRenderer _meshRenderer;
     
-    public Color[] GenerateNoiseColors(Mesh mesh, float[,] noiseMap)
+    public Color[] GenerateColors(Mesh mesh, float[,] noiseMap)
     {
         if (_meshFilter == null)
         {
@@ -25,7 +25,6 @@ public class MapDisplay : MonoBehaviour
         }
         
         List<Color> colorMap = new List<Color>();
-       
         IEnumerator<Triangle> trisEnum = mesh.Triangles.GetEnumerator();
         
         for (int i = 0; i < mesh.Triangles.Count; i++)
@@ -51,7 +50,7 @@ public class MapDisplay : MonoBehaviour
                 colorMap.Add(gradient.Evaluate(noiseMap[(int)pos.x, (int) pos.y]));
             }
         }
-
+        
         return colorMap.ToArray();
     }
 
